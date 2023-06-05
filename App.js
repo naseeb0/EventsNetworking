@@ -7,6 +7,12 @@ import LoginScreen from "./screens/LoginScreen";
 import { storeData, getData } from "./config/asyncStorage";
 import * as SplashScreen from "expo-splash-screen";
 import RegisterScreen from "./screens/RegisterScreen";
+import WorkshopScreen from "./screens/WorkshopScreen";
+//importing all the screens
+import HomeScreen from './screens/HomeScreen';
+import RecommendationScreen from './screens/RecommendationScreen';
+import DisplayScreen from './screens/DisplayScreen';
+import MapScreen from './screens/MapScreen';
 
 //Theme context is used to update the
 //theme of the app. It will be used in
@@ -94,6 +100,16 @@ const App = () => {
             component={Footer}
             options={{ headerShown: false }}
           />
+        
+<Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown:false}} />
+        <Stack.Screen name="RecommendationScreen" component={RecommendationScreen} options={{headerShown:false }} />
+        <Stack.Screen name="DisplayScreen" component={DisplayScreen} />
+        <Stack.Screen name="MapScreen" component={MapScreen} />
+        <Stack.Screen name="WorkshopScreen" component={WorkshopScreen} options={{headerShown:false }} />
+        
+
+
+
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeContext.Provider>

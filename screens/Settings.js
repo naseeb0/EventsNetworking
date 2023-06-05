@@ -45,21 +45,10 @@ const SettingsScreen = ({ navigation }) => {
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}
     >
-      <StyledText style={{ color: activeColors.accent }} bold>
-        User
-      </StyledText>
-
-      <View style={styles.section}>
-        <SettingsItem label="Name">
-          <StyledText>Maro</StyledText>
-        </SettingsItem>
-        <SettingsItem label="Joined On">
-          <StyledText>02/12/2022</StyledText>
-        </SettingsItem>
-      </View>
+     
 
       <StyledText style={{ color: activeColors.accent }} bold>
-        Theme Switch
+        Switch Theme
       </StyledText>
 
       <View style={styles.section}>

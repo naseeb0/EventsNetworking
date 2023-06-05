@@ -1,79 +1,141 @@
-import React, { useContext, useState, useRef } from "react";
-import { colors } from "../config/theme";
-import { ThemeContext } from "../context/ThemeContext";
-import { View, ScrollView, RefreshControl } from "react-native";
-import { StyleSheet } from "react-native";
-import CategoryTabSection from "../components/sections/CategoryTabSection";
-import FeaturedItemsSection from "../components/sections/FeaturedItemsSection";
-import HorizontalDealsSection from "../components/sections/HorizontalDealsSection";
+import React, { useState, useEffect, useContext } from 'react';
+import { ScrollView, View, Text, Image, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Card } from 'react-native-paper'; // Import Card component from Material UI
+import { ThemeContext } from '../context/ThemeContext'; // Import ThemeContext
 
-const HomeScreens = () => {
-  const { theme } = useContext(ThemeContext);
-  let activeColors = colors[theme.mode];
+import { fetchEvents } from './api';
 
-  const [refreshing, setRefreshing] = useState(false);
+const HomeScreen = () => {
+  const [randomWorkshops, setRandomWorkshops] = useState([]);
+  const [selectedWorkshops, setSelectedWorkshops] = useState([]);
+  const navigation = useNavigation();
+  const { theme } = useContext(ThemeContext); // Access the current theme from the context
 
-  const onRefresh = () => {
-    setRefreshing(true);
+  useEffect(() => {
+    getRandomWorkshops();
+  }, []);
 
-    // Fetch new data here and update your state
+  const handleSelectWorkshop = (workshop) => {
+    navigation.navigate('RecommendationScreen', { workshop });
+  };
 
-    // After fetching the data, set refreshing to false
-    setRefreshing(false);
+  const getRandomWorkshops = async () => {
+    try {
+      const events = await fetchEvents();
+      if (events.length > 0) {
+        const randomIndices = getRandomIndices(events.length, 20);
+        const workshops = randomIndices.map((index) => events[index]).filter(Boolean);
+        if (workshops.length > 0) {
+          setRandomWorkshops(workshops);
+        } else {
+          console.log('Random workshops not found.');
+        }
+      } else {
+        console.log('No workshops available.');
+      }
+    } catch (error) {
+      console.error('Error getting random workshops:', error);
+    }
+  };
+
+  const getRandomIndices = (max, count) => {
+    const indices = [];
+    while (indices.length < count) {
+      const randomIndex = Math.floor(Math.random() * max);
+      if (!indices.includes(randomIndex)) {
+        indices.push(randomIndex);
+      }
+    }
+    return indices;
+  };
+
+  const isWorkshopSelected = (workshop) => {
+    return selectedWorkshops.includes(workshop);
+  };
+
+  const handleFavoriteWorkshop = (workshop) => {
+    const isSelected = selectedWorkshops.includes(workshop);
+    const updatedSelectedWorkshops = isSelected
+      ? selectedWorkshops.filter((selected) => selected !== workshop)
+      : [...selectedWorkshops, workshop];
+    setSelectedWorkshops(updatedSelectedWorkshops);
+  
+    if (!isSelected) {
+      navigation.navigate('RecommendationScreen', { selectedWorkshops: updatedSelectedWorkshops });
+    }
+  };
+  
+  const starMappings = {
+    1: 'star',
+    2: 'star',
+    3: 'star',
+    4: 'star',
+    5: 'star',
+  };
+
+  const cardStyle = {
+    margin: 16,
+    backgroundColor: theme.mode === 'dark' ? '#333333' : '#FFFFFF', // Set the background color based on the current theme
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   };
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      style={[
-        {
-          backgroundColor: activeColors.primary,
-        },
-        styles.Container,
-      ]}
-      contentContainerStyle={{ flexGrow: 1 }}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
-      <View style={{ flexGrow: 1 }}>
-        <ScrollView>
-          <View
-            style={{
-              flexDirection: "row",
-              marginTop: 10,
-              paddingHorizontal: 10,
-            }}
-          ></View>
+    <ScrollView>
+      {randomWorkshops.map((workshop, index) => (
+        <TouchableOpacity
+          key={index}
+          onPress={() => handleSelectWorkshop(workshop.Workshop)}
+        >
+          <Card style={cardStyle}>
+            <Card.Content style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image
+                source={{ uri: workshop.Images }}
+                style={{ width: 100, height: 100, borderRadius: 8 }}
+                resizeMode="contain"
+              />
+              <View style={{ marginLeft: 16, flex: 1 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: theme.mode === 'dark' ? '#FFFFFF' : '#333333' }}>
+                  {workshop.Workshop}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 8, color: theme.mode === 'dark' ? '#FFFFFF' : '#333333' }}>{workshop.College}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {Array(workshop.Ratings)
+                    .fill()
+                    .map((_, index) => (
+                      <Icon
+                        key={index}
+                        name={starMappings[workshop.Ratings]}
+                        style={{ color: 'gold', fontSize: 20 }}
+                      />
+                    ))}
+                </View>
+              </View>
+              <TouchableOpacity
+                style={{ padding: 8 }}
+                onPress={() => handleFavoriteWorkshop(workshop.Workshop)}
+              >
+               <Icon
+  name={isWorkshopSelected(workshop.Workshop) ? 'heart' : 'heart-outline'}
+  size={20}
+  color={isWorkshopSelected(workshop.Workshop) ? 'red' : theme.mode === 'dark' ? '#FFFFFF' : '#333333'}
+/>
 
-          <CategoryTabSection />
-        </ScrollView>
-        <FeaturedItemsSection />
-        <ScrollView>
-          <View
-            style={{
-              flexDirection: "row",
-              marginTop: 10,
-              paddingHorizontal: 10,
-            }}
-          ></View>
-
-          <HorizontalDealsSection />
-        </ScrollView>
-      </View>
+              </TouchableOpacity>
+            </Card.Content>
+          </Card>
+        </TouchableOpacity>
+      ))}
     </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  Container: {
-    flex: 1,
-  },
-  sectionTitle: {
-    marginTop: 25,
-    marginLeft: 25,
-    marginBottom: 25,
-  },
-});
-
-export default HomeScreens;
+export default HomeScreen;
