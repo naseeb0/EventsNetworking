@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { ScrollView, View, Text, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { fetchEvents } from './api';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icons from 'react-native-vector-icons/FontAwesome'; 
+import { Card } from 'react-native-paper'; // Import Card component from Material UI
+import { ThemeContext } from '../context/ThemeContext'; // Import ThemeContext
+
+import { fetchEvents } from './api';
 
 const HomeScreen = () => {
   const [randomWorkshops, setRandomWorkshops] = useState([]);
   const [selectedWorkshops, setSelectedWorkshops] = useState([]);
   const navigation = useNavigation();
-  
+  const { theme } = useContext(ThemeContext); // Access the current theme from the context
+
   useEffect(() => {
     getRandomWorkshops();
   }, []);
@@ -72,86 +75,67 @@ const HomeScreen = () => {
     5: 'star',
   };
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {randomWorkshops.map((workshop, index) => (
-        <View key={index} style={styles.cardContainer}>
-          <Image source={{ uri: workshop.Images }} style={styles.image} resizeMode="contain" />
-          <View style={styles.textContainer}>
-            <Text style={styles.workshopText}>{workshop.Workshop}</Text>
-            <Text style={styles.collegeText}>{workshop.College}</Text>
-            <View style={styles.ratingContainer}>
-                {Array(workshop.Ratings)
-                  .fill()
-                  .map((_, index) => (
-                    <Icon key={index} name={starMappings[workshop.Ratings]} style={styles.starIcon} />
-                  ))}
-                </View>
+  const cardStyle = {
+    margin: 16,
+    backgroundColor: theme.mode === 'dark' ? '#333333' : '#FFFFFF', // Set the background color based on the current theme
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  };
 
-            <TouchableOpacity
-              style={styles.favoriteButton}
-              onPress={() => handleFavoriteWorkshop(workshop.Workshop)}
-            >
-              <Icon
-                name={isWorkshopSelected(workshop.Workshop) ? 'heart' : 'heart-outline'}
-                size={20}
-                color={isWorkshopSelected(workshop.Workshop) ? 'red' : '#333333'}
+  return (
+    <ScrollView>
+      {randomWorkshops.map((workshop, index) => (
+        <TouchableOpacity
+          key={index}
+          onPress={() => handleSelectWorkshop(workshop.Workshop)}
+        >
+          <Card style={cardStyle}>
+            <Card.Content style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image
+                source={{ uri: workshop.Images }}
+                style={{ width: 100, height: 100, borderRadius: 8 }}
+                resizeMode="contain"
               />
-            </TouchableOpacity>
-          </View>
-        </View>
+              <View style={{ marginLeft: 16, flex: 1 }}>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: theme.mode === 'dark' ? '#FFFFFF' : '#333333' }}>
+                  {workshop.Workshop}
+                </Text>
+                <Text style={{ fontSize: 14, marginBottom: 8, color: theme.mode === 'dark' ? '#FFFFFF' : '#333333' }}>{workshop.College}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {Array(workshop.Ratings)
+                    .fill()
+                    .map((_, index) => (
+                      <Icon
+                        key={index}
+                        name={starMappings[workshop.Ratings]}
+                        style={{ color: 'gold', fontSize: 20 }}
+                      />
+                    ))}
+                </View>
+              </View>
+              <TouchableOpacity
+                style={{ padding: 8 }}
+                onPress={() => handleFavoriteWorkshop(workshop.Workshop)}
+              >
+               <Icon
+  name={isWorkshopSelected(workshop.Workshop) ? 'heart' : 'heart-outline'}
+  size={20}
+  color={isWorkshopSelected(workshop.Workshop) ? 'red' : theme.mode === 'dark' ? '#FFFFFF' : '#333333'}
+/>
+
+              </TouchableOpacity>
+            </Card.Content>
+          </Card>
+        </TouchableOpacity>
       ))}
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  cardContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    marginBottom: 16,
-    elevation: 2,
-    padding: 8,
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-  },
-  textContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  workshopText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 8,
-  },
-  collegeText: {
-    fontSize: 14,
-    color: '#333333',
-    marginBottom: 8,
-  },
-  favoriteButton: {
-    marginLeft: 'auto',
-    padding: 8,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  
-  starIcon: {
-    color: 'gold',
-    fontSize: 20,
-  },
-});
 
 export default HomeScreen;
