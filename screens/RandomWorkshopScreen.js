@@ -5,7 +5,7 @@ import { fetchEvents } from './api';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icons from 'react-native-vector-icons/FontAwesome'; 
 
-const HomeScreen = () => {
+const RandomWorkshopScreen = () => {
   const [randomWorkshops, setRandomWorkshops] = useState([]);
   const [selectedWorkshops, setSelectedWorkshops] = useState([]);
   const navigation = useNavigation();
@@ -154,4 +154,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default RandomWorkshopScreen;
