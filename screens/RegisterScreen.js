@@ -1,3 +1,7 @@
+import firebase from "firebase/app";
+import "firebase/auth";
+
+
 import React, { useState, useContext } from "react";
 import {
   SafeAreaView,
@@ -26,6 +30,29 @@ const RegisterScreen = ({ navigation }) => {
 
   const { theme } = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
+
+
+const handleSignup = () => {
+  firebase
+    .auth()
+    .createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      // Signed in
+      var user = userCredential.user;
+      console.log(user.email);
+
+      // ...
+    })
+    .catch((error) => {
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // ..
+    });
+};
+
+
+
+
   return (
     <SafeAreaView
       style={{
@@ -172,45 +199,8 @@ const RegisterScreen = ({ navigation }) => {
           inputType="password"
         />
 
-        <View
-          style={{
-            flexDirection: "row",
-            borderBottomColor: "#ccc",
-            borderBottomWidth: 1,
-            paddingBottom: 8,
-            marginBottom: 30,
-          }}
-        >
-          <Ionicons
-            name="calendar-outline"
-            size={20}
-            color="#666"
-            style={{ marginRight: 5 }}
-          />
-          <TouchableOpacity onPress={() => setOpen(true)}>
-            <Text style={{ color: "#666", marginLeft: 5, marginTop: 5 }}>
-              {dobLabel}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <DatePicker
-          modal
-          open={open}
-          date={date}
-          mode={"date"}
-          maximumDate={new Date("2015-01-01")}
-          minimumDate={new Date("1980-01-01")}
-          onConfirm={(date) => {
-            setOpen(false);
-            setDate(date);
-            setDobLabel(date.toDateString());
-          }}
-          onCancel={() => {
-            setOpen(false);
-          }}
-        />
-
-        <CustomButton label={"Register"} onPress={() => {}} />
+    
+        <CustomButton label={"Register"} onPress={() => {handleSignup}} />
 
         <View
           style={{
